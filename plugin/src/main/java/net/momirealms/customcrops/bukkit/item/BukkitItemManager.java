@@ -259,7 +259,7 @@ public class BukkitItemManager extends AbstractItemManager {
     @NotNull
     @Override
     public FurnitureRotation removeFurniture(@NotNull Location location) {
-        Collection<Entity> entities = location.getWorld().getNearbyEntities(LocationUtils.toSurfaceCenterLocation(location), 0.5,0.25,0.5);
+        Collection<Entity> entities = location.getWorld().getNearbyEntities(LocationUtils.toSurfaceCenterLocation(location), 0.5,0.51,0.5);
         FurnitureRotation rotation = null;
         for (Entity entity : entities) {
             if (this.provider.removeFurniture(entity) && rotation == null) {
@@ -302,7 +302,7 @@ public class BukkitItemManager extends AbstractItemManager {
     @Override
     @Nullable
     public String furnitureID(Location location) {
-        Collection<Entity> entities = location.getWorld().getNearbyEntities(LocationUtils.toSurfaceCenterLocation(location), 0.5,0.25,0.5);
+        Collection<Entity> entities = location.getWorld().getNearbyEntities(LocationUtils.toSurfaceCenterLocation(location), 0.5,0.51,0.5);
         for (Entity entity : entities) {
             if (provider.isFurniture(entity)) {
                 return provider.furnitureID(entity);
@@ -361,12 +361,17 @@ public class BukkitItemManager extends AbstractItemManager {
             try {
                 return new ItemStack(Material.valueOf(id.toUpperCase(Locale.ENGLISH)));
             } catch (IllegalArgumentException e) {
-                Material material = Registry.MATERIAL.get(new NamespacedKey("minecraft", id.toLowerCase(Locale.ENGLISH)));
-                if (material != null) {
-                    return new ItemStack(material);
+                try {
+                    Material material = Registry.MATERIAL.get(new NamespacedKey("minecraft", id.toLowerCase(Locale.ENGLISH)));
+                    if (material != null) {
+                        return new ItemStack(material);
+                    }
+                    plugin.getPluginLogger().warn("Item " + id + " not exists", e);
+                    return new ItemStack(Material.PAPER);
+                } catch (IllegalArgumentException exception) {
+                    plugin.getPluginLogger().warn("Illegal item " + id, exception);
+                    return new ItemStack(Material.PAPER);
                 }
-                plugin.getPluginLogger().warn("Item " + id + " not exists", e);
-                return new ItemStack(Material.PAPER);
             }
         } else {
             String[] split = id.split(":", 2);
